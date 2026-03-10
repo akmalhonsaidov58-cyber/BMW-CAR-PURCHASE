@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMW Excellence | Fully Functional</title>
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #1c69d4;
+            --bg: #050505;
+            --card: #111;
+            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* === HEADER === */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            padding: 20px 0; transition: 0.4s; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px);
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 30px; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.6rem; font-weight: 900; letter-spacing: 4px; color: #fff; text-decoration: none; }
+
+        .search-bar { background: var(--glass); border-radius: 20px; padding: 5px 15px; display: flex; align-items: center; }
+        .search-bar input { background: transparent; border: none; color: #fff; padding: 5px; outline: none; width: 150px; }
+
+        .actions { display: flex; gap: 25px; align-items: center; }
+        .cart-icon { position: relative; cursor: pointer; font-size: 1.6rem; }
+        #cart-count { position: absolute; top: -5px; right: -10px; background: var(--accent); font-size: 0.7rem; padding: 2px 7px; border-radius: 50%; }
+
+        /* === CART SIDEBAR === */
+        #sidebar {
+            position: fixed; right: -400px; top: 0; width: 350px; height: 100%;
+            background: #111; z-index: 2000; padding: 40px; transition: 0.5s;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        #sidebar.active { right: 0; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .close-cart { cursor: pointer; font-size: 2rem; margin-bottom: 20px; }
+
+        /* === HERO === */
+        .hero {
+            height: 80vh; display: flex; align-items: center;
+            background: linear-gradient(to right, #000, transparent), url('https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center;
+        }
+        .hero-h1 { font-size: 5rem; font-weight: 900; line-height: 1; margin-bottom: 20px; }
+
+        /* === FILTER === */
+        .filters { display: flex; justify-content: center; gap: 20px; margin: 50px 0; }
+        .f-btn { background: var(--glass); color: #fff; border: 1px solid #333; padding: 10px 25px; cursor: pointer; border-radius: 30px; transition: 0.3s; }
+        .f-btn.active { background: var(--accent); border-color: var(--accent); }
+
+        /* === GRID === */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; }
+        .car-card { background: var(--card); border-radius: 15px; overflow: hidden; transition: 0.4s; position: relative; }
+        .car-card:hover { transform: translateY(-10px); }
+        .card-img { height: 230px; overflow: hidden; position: relative; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Color dots */
+        .colors { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 5px; }
+        .dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; }
+
+        .card-info { padding: 25px; }
+        .card-info h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .price { font-size: 1.4rem; color: var(--accent); font-weight: bold; }
+        .add-btn { width: 100%; margin-top: 20px; padding: 12px; background: var(--accent); border: none; color: #fff; font-weight: bold; cursor: pointer; border-radius: 8px; }
+
+        /* === TOAST === */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--accent); padding: 15px 40px; border-radius: 50px; display: none; z-index: 3000; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { bottom: -50px; } to { bottom: 30px; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-inner">
+            <a href="#" class="logo">BMW</a>
+            <div class="search-bar">
+                <i class='bx bx-search'></i>
+                <input type="text" id="searchInput" placeholder="Modelni qidirish...">
+            </div>
+            <div class="actions">
+                <div class="cart-icon" id="cartOpen">
+                    <i class='bx bx-shopping-bag'></i>
+                    <span id="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="sidebar">
+        <div class="close-cart" id="cartClose">&times;</div>
+        <h2>Sizning Tanlovingiz</h2><br>
+        <div id="cart-items-list"></div>
+        <hr style="opacity: 0.1;"><br>
+        <div style="display: flex; justify-content: space-between;">
+            <span>Jami:</span>
+            <span id="total-price" style="color: var(--accent); font-weight: bold;">0 €</span>
+        </div><br>
+        <button class="add-btn" onclick="alert('Buyurtma qabul qilindi!')">Rasmiylashtirish</button>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-h1">THE NEW<br><span style="color: var(--accent);">M4 GTR</span></h1>
+            <p>Sheer driving pleasure starts here.</p>
+        </div>
+    </section>
+
+    <main class="container">
+        <div class="filters">
+            <button class="f-btn active" data-filter="all">Hammasi</button>
+            <button class="f-btn" data-filter="m-series">M Series</button>
+            <button class="f-btn" data-filter="suv">SUV</button>
+            <button class="f-btn" data-filter="electric">Electric</button>
+        </div>
+
+        <div class="grid" id="carGrid"></div>
+    </main>
+
+    <div id="toast">Mahsulot qo'shildi!</div>
+
+    <script>
+        // 1. DATA (Barcha ma'lumotlar)
+        const cars = [
+            { id: 1, name: "BMW M5 CS", price: 142000, type: "m-series", img: "https://images.unsplash.com/photo-1556189250-72ba954cfc2b?w=600" },
+            { id: 2, name: "BMW i7 M70", price: 158000, type: "electric", img: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=600" },
+            { id: 3, name: "BMW X5 Competition", price: 115000, type: "suv", img: "https://images.unsplash.com/photo-1606148334071-d007421f6492?w=600" },
+            { id: 4, name: "BMW M3 Touring", price: 98000, type: "m-series", img: "https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?w=600" },
+            { id: 5, name: "BMW iX xDrive", price: 89000, type: "electric", img: "https://images.unsplash.com/photo-1619330091138-ec1aaaf3301a?w=600" },
+            { id: 6, name: "BMW XM Red Label", price: 185000, type: "suv", img: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600" }
+        ];
+
+        let cart = [];
+        const grid = document.getElementById('carGrid');
+
+        // 2. RENDER CARS (Filtrlash va Qidiruv bilan)
+        function render(data) {
+            grid.innerHTML = '';
+            data.forEach(car => {
+                const el = document.createElement('div');
+                el.className = 'car-card';
+                el.innerHTML = `
+                    <div class="card-img">
+                        <img src="${car.img}" id="img-${car.id}">
+                        <div class="colors">
+                            <div class="dot" style="background: black;" onclick="changeColor(${car.id}, 'black')"></div>
+                            <div class="dot" style="background: silver;" onclick="changeColor(${car.id}, 'silver')"></div>
+                            <div class="dot" style="background: #1c69d4;" onclick="changeColor(${car.id}, 'blue')"></div>
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <h3>${car.name}</h3>
+                        <p class="price">${car.price.toLocaleString()} €</p>
+                        <button class="add-btn" onclick="addToCart(${car.id})">Savatga Qo'shish</button>
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        // 3. CART FUNCTIONS
+        function addToCart(id) {
+            const car = cars.find(c => c.id === id);
+            cart.push(car);
+            updateCart();
+            showToast();
+        }
+
+        function updateCart() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const list = document.getElementById('cart-items-list');
+            const totalEl = document.getElementById('total-price');
+            list.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price;
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `<span>${item.name}</span> <b>${item.price} €</b> <i class='bx bx-trash' onclick="removeFromCart(${index})" style="cursor:pointer; color:red;"></i>`;
+                list.appendChild(div);
+            });
+            totalEl.innerText = total.toLocaleString() + " €";
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        // 4. COLOR CHANGE (Configurator Simulation)
+        function changeColor(id, color) {
+            const img = document.getElementById(`img-${id}`);
+            if(color === 'silver') img.style.filter = 'grayscale(1) brightness(1.2)';
+            else if(color === 'blue') img.style.filter = 'hue-rotate(180deg) brightness(0.8)';
+            else img.style.filter = 'none';
+        }
+
+        // 5. SEARCH & FILTER LOGIC
+        document.getElementById('searchInput').oninput = function(e) {
+            const val = e.target.value.toLowerCase();
+            const filtered = cars.filter(c => c.name.toLowerCase().includes(val));
+            render(filtered);
+        };
+
+        document.querySelectorAll('.f-btn').forEach(btn => {
+            btn.onclick = function() {
+                document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const type = this.dataset.filter;
+                const filtered = type === 'all' ? cars : cars.filter(c => c.type === type);
+                render(filtered);
+            }
+        });
+
+        // 6. UI ACTIONS
+        document.getElementById('cartOpen').onclick = () => document.getElementById('sidebar').classList.add('active');
+        document.getElementById('cartClose').onclick = () => document.getElementById('sidebar').classList.remove('active');
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+
+        // Init
+        render(cars);
+    </script>
+</body>
+</html>
